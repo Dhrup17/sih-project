@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: landstack_postgres
+    environment:
+      POSTGRES_USER: landstack
+      POSTGRES_PASSWORD: landstack123
+      POSTGRES_DB: landstack_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U landstack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: landstack_backend
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://landstack:landstack123@postgres:5432/landstack_db
+      SECRET_KEY: land-stack-super-secret-key-change-in-production-2024
+      BACKEND_CORS_ORIGINS: http://localhost:5173,http://localhost:3000,http://localhost
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: sh -c "sleep 5 && python seed_data.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: landstack_frontend
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

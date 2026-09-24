@@ -1,0 +1,39 @@
+# Virtual Environment
+backend/venv/
+venv/
+ENV/
+env/
+
+# Node modules & build
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# Database
+backend/landstack.db
+backend/landstack.db-journal
+*.sqlite3
+*.db
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environment files
+.env
+.env.local
+!.env.example
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.user
+
+# Docker
+.docker/
