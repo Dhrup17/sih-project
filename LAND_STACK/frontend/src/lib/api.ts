@@ -23,9 +23,16 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only logout on 401 if it's not a login/register request failing with bad credentials
+    const requestUrl = error.config?.url || ''
+    const isAuthRoute = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register')
+
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      localStorage.removeItem('user')
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }
